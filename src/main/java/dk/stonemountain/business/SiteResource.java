@@ -105,6 +105,16 @@ public class SiteResource {
     }
 
     @GET
+    @Path("/{siteName}/pages/full-text-search")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<SearchResult> fullTextSearch(@PathParam("siteName") @NotBlank String siteName, @NotBlank @QueryParam("query") String query) {
+        List<Page> result = service.searchByFullTextSearch(Index.PAGES, ElasticSearchService.pageSourceReader, query, "page-text");
+        return result.stream()
+            .map(p -> new SearchResult(p.id, p.url, p.siteId))
+            .toList();
+    }
+
+    @GET
     @Path("/{siteName}/pages")
     @Produces(MediaType.APPLICATION_JSON)
     public List<SearchResult> search(@PathParam("siteName") @NotBlank String siteName, @QueryParam("term") String term, @QueryParam("match") String match) {

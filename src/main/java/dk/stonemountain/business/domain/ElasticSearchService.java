@@ -2,6 +2,7 @@ package dk.stonemountain.business.domain;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,8 +22,6 @@ import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.gson.internal.Streams;
 
 import dk.stonemountain.business.dto.Site;
 import dk.stonemountain.business.util.JsonbHelper;
@@ -89,7 +88,7 @@ public class ElasticSearchService {
 
     public static class TermMatchPair {
         public enum QueryType {
-            TERM, WILDCARD;
+            TERM, WILDCARD, SIMPLE_QUERY_STRING;
 
             public String field() {
                 return name().toLowerCase();
@@ -106,6 +105,21 @@ public class ElasticSearchService {
             this.match = match;
         }
     }
+
+    public <T> List<T> searchByFullTextSearch(Index index, SourceReader<T> reader, String query, String... fields) {
+        JsonObjectBuilder simpleQueryBuilder = Json.createObjectBuilder();
+        JsonObjectBuilder queryBuilder = Json.createObjectBuilder();
+        JsonArrayBuilder fieldsBuilder = Json.createArrayBuilder();
+        Arrays.asList(fields).forEach(fieldsBuilder::add);
+        
+        queryBuilder.add("query", query);
+        queryBuilder.add("fields", fieldsBuilder.build());
+        queryBuilder.add("default_operator", "and");
+        queryBuilder.add("analyze_wildcard", true);
+        simpleQueryBuilder.add("simple_query_string", queryBuilder.build());
+        return search(index, reader, simpleQueryBuilder.build());
+    }
+
 
     public <T> List<T> searchByTerms(Index index, SourceReader<T> reader, TermMatchPair... termPairs) {
         JsonObjectBuilder boolBuilder = Json.createObjectBuilder();
