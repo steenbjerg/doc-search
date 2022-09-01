@@ -1,25 +1,18 @@
 package dk.stonemountain.business.domain;
 
-import javax.json.JsonObject;
+import java.util.List;
+
 import javax.json.bind.annotation.JsonbProperty;
 
-public class SearchResult {
-    public String id;
+public record SearchResult(
+    String id,
     @JsonbProperty("site-id")
-    public String siteId;
-    public String url;
-
-    public SearchResult() {
-    }
-
-    public SearchResult(String id, String url, String siteId) {
-        this.id = id;
-        this.url = url;
-        this.siteId = siteId;
-    }
-
-    @Override
-    public String toString() {
-        return "SearchResult [id=" + id + ", url=" + url + ", siteId=" + siteId + "]";
+    String siteId,
+    String url,
+    String title,
+    List<FieldHit> highlights) {
+ 
+    public SearchResult(Hit<Page> hit) {
+        this(hit.source.id, hit.source.siteId, hit.source.url, hit.source.title, hit.highlights.stream().map(FieldHit::new).toList());
     }
 }

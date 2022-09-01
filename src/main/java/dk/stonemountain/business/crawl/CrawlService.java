@@ -1,6 +1,7 @@
 package dk.stonemountain.business.crawl;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -8,6 +9,7 @@ import javax.enterprise.context.ApplicationScoped;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +24,7 @@ public class CrawlService {
 
     @FunctionalInterface
     public static interface CrawlObserver {
-        void update(Site site, String link, String text);
+        void update(Site site, String link, Optional<String> title, String text);
     }
 
     private CrawlObserver observer;
@@ -50,9 +52,15 @@ public class CrawlService {
             return;
         }
 
-        // extract text
-        String textInBody = doc.body().text();
-        observer.update(site, currentLink, textInBody);
+        // extract data
+        Element titleElement = doc.select("title").first();
+        Optional<String> title = Optional.empty();
+        if (titleElement != null) {
+            title = Optional.of(titleElement.text());
+        }
+        String textInBody = clean(doc.body().text());
+
+        observer.update(site, currentLink, title, textInBody);
 
         // extract links
         Elements links = doc.select("a[href]");
@@ -65,7 +73,16 @@ public class CrawlService {
             .filter(l -> !alreadyVisited(l, visitedLinks))
             .filter(l -> l.startsWith(site.inclusionUrl))
             .peek(l -> log.trace("Accepted link {} at page {}", l, currentLink))
-            .forEach(l -> crawl(l));
+            .forEach(this::crawl);
+    }
+
+    private String clean(String text) {
+        if (text != null) {
+            text = text.replace("\n", "").replace("\t", "");
+            text = text.replace("\\", "");
+            text = text.trim();
+        }
+        return text;
     }
 
     private boolean alreadyVisited(String link, SortedSet<String> visitedLinks) {

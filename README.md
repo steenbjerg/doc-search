@@ -22,12 +22,25 @@ use
 sudo apt-get install podman podman-docker
 ```
 
+use 
+
+```shell script
+export DOCKER_HOST=unix:///run/user/${UID}/podman/podman.sock
+export TESTCONTAINERS_RYUK_DISABLED=true
+```
+
 You can now run your application in dev mode:
 ```shell script
 ./gradlew quarkusDev
 ```
 
 try running http://localhost:8080/q/health-ui/ to see if elasticsearch is ok (or go in via http://localhost:8080/q/dev/).
+
+You can also try running elastic search in a podman outside devservices (switch inside application.properties):
+
+```shell script
+podman run --name elasticsearch  -e "discovery.type=single-node" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" --rm -p 9200:9200 docker.elastic.co/elasticsearch/elasticsearch:7.17.0
+```
 
 ## Packaging and running the application
 

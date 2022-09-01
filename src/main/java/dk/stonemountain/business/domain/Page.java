@@ -8,21 +8,23 @@ public class Page {
     @JsonbProperty("site-id")
     public String siteId;
     public String url;
+    public String title;
     @JsonbProperty("page-text")
     public String pageText;
 
     public Page() {
     }
 
-    public Page(String id, String url, String pageText, String siteId) {
+    public Page(String id, String url, String title, String pageText, String siteId) {
         this.id = id;
         this.url = url;
         this.pageText = pageText;
+        this.title = title;
         this.siteId = siteId;
     }
 
     @Override
     public String toString() {
-        return "Page [id=" + id + ", siteId=" + siteId + ", pageText (length)=" + (pageText != null ? pageText.length() : null) + ", url=" + url + "]";
+        return "Page [id=" + id + ", siteId=" + siteId + ", title=" + title + ", pageText (length)=" + (pageText != null ? pageText.length() : null) + ", url=" + url + "]";
     }
 }
