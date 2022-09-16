@@ -26,16 +26,16 @@ import org.slf4j.LoggerFactory;
 import dk.stonemountain.business.crawl.CrawlService;
 import dk.stonemountain.business.domain.ElasticSearchService;
 import dk.stonemountain.business.domain.Hit;
-import dk.stonemountain.business.domain.ElasticSearchService.Index;
 import dk.stonemountain.business.domain.Page;
 import dk.stonemountain.business.domain.SearchResult;
 import dk.stonemountain.business.dto.Site;
+import dk.stonemountain.business.dto.Sites;
 import io.smallrye.common.constraint.NotNull;
 
 @Path("/sites")
 public class SiteResource {
     private static final Logger log = LoggerFactory.getLogger(SiteResource.class);
-    
+    private static final String SITES_INDEX = "sites";
     @Inject
     ElasticSearchService service;
     @Inject
@@ -43,22 +43,24 @@ public class SiteResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<Site> getSites() {
-        List<Hit<Site>> result = service.searchAll(Index.SITES, ElasticSearchService.siteSourceReader);
-        return result.stream().map(h -> h.source).toList();
+    public Sites getSites() {
+        List<Hit<Site>> result = service.searchAll(SITES_INDEX, ElasticSearchService.siteSourceReader);
+
+        var list = result.stream().map(h -> h.source).toList();
+        return new Sites(list.size(), ZonedDateTime.now(), list);
     }
 
     @GET
     @Path("/{siteName}")
     @Produces(MediaType.APPLICATION_JSON)
     public Site getSite(@PathParam("siteName") String siteName) {
-        return service.getById(Site.class, ElasticSearchService.siteSourceReader, Index.SITES, siteName).orElseThrow(() -> new RuntimeException("Not Found"));
+        return service.getById(ElasticSearchService.siteSourceReader, SITES_INDEX, siteName).orElseThrow(() -> new RuntimeException("Not Found"));
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Site create(@NotNull @Valid Site site) {
-        service.addToIndex(Index.SITES, site.name, site);
+        service.addToIndex(SITES_INDEX, site.name, site);
         return getSite(site.name);
     }
 
@@ -69,7 +71,7 @@ public class SiteResource {
         Site site = getSite(siteName);
         LocalDateTime startTime = LocalDateTime.now();
         crawlService.crawl(site, (s, p, title, text) -> service.addToIndex(
-            Index.PAGES,
+            site.name,
             URLEncoder.encode(Base64.getEncoder().encodeToString((s.name + "#" + p).getBytes()), StandardCharsets.UTF_8), 
             new Page(
                 URLEncoder.encode(Base64.getEncoder().encodeToString((s.name + "#" + p).getBytes()), StandardCharsets.UTF_8), 
@@ -86,29 +88,15 @@ public class SiteResource {
     }
 
     @GET
-    @Path("/pages")
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<SearchResult> search(@QueryParam("term") String term, @QueryParam("match") String match) {
-        List<Hit<Page>> result;
-        if (term == null) {
-            result = service.searchAll(Index.PAGES, ElasticSearchService.pageSourceReader);
-        } else {
-            result = service.search(Index.PAGES, ElasticSearchService.pageSourceReader, term, match);
-        }
-        return result.stream()
-            .map(SearchResult::new)
-            .toList();
-    }
-
-    @GET
     @Path("/{siteName}/pages/search-by-text")
     @Produces(MediaType.APPLICATION_JSON)
     public List<SearchResult> searchByText(@PathParam("siteName") @NotBlank String siteName, @QueryParam("match") String match) {
+        Site site = getSite(siteName);
         List<Hit<Page>> result;
         if (match == null) {
-            result = service.searchAll(Index.PAGES, ElasticSearchService.pageSourceReader);
+            result = service.searchAll(site.name, ElasticSearchService.pageSourceReader);
         } else {
-            result = service.searchByTerms(Index.PAGES, ElasticSearchService.pageSourceReader, new ElasticSearchService.TermMatchPair(ElasticSearchService.TermMatchPair.QueryType.TERM, "site-id", siteName), new ElasticSearchService.TermMatchPair(ElasticSearchService.TermMatchPair.QueryType.WILDCARD, "page-text", match));
+            result = service.searchByTerms(site.name, ElasticSearchService.pageSourceReader, new ElasticSearchService.TermMatchPair(ElasticSearchService.TermMatchPair.QueryType.TERM, "site-id", siteName), new ElasticSearchService.TermMatchPair(ElasticSearchService.TermMatchPair.QueryType.WILDCARD, "page-text", match));
         }
         return result.stream()
             .map(SearchResult::new)
@@ -119,21 +107,23 @@ public class SiteResource {
     @Path("/{siteName}/pages/full-text-search")
     @Produces(MediaType.APPLICATION_JSON)
     public List<SearchResult> fullTextSearch(@PathParam("siteName") @NotBlank String siteName, @NotBlank @QueryParam("query") String query) {
-        List<Hit<Page>> result = service.searchByFullTextSearch(Index.PAGES, ElasticSearchService.pageSourceReader, query, "page-text", "title");
+        Site site = getSite(siteName);
+        List<Hit<Page>> result = service.searchByFullTextSearch(site.name, ElasticSearchService.pageSourceReader, query, "page-text", "title");
         return result.stream()
             .map(SearchResult::new)
             .toList();
     }
 
     @GET
-    @Path("/{siteName}/pages")
+    @Path("/{siteName}/term-search")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<SearchResult> search(@PathParam("siteName") @NotBlank String siteName, @QueryParam("term") String term, @QueryParam("match") String match) {
+    public List<SearchResult> searchByTerm(@PathParam("siteName") @NotBlank String siteName, @QueryParam("term") String term, @QueryParam("match") String match) {
+        Site site = getSite(siteName);
         List<Hit<Page>> result;
         if (term == null) {
-            result = service.searchAll(Index.PAGES, ElasticSearchService.pageSourceReader);
+            result = service.searchAll(site.name, ElasticSearchService.pageSourceReader);
         } else {
-            result = service.search(Index.PAGES, ElasticSearchService.pageSourceReader, term, match);
+            result = service.search(site.name, ElasticSearchService.pageSourceReader, term, match);
         }
         return result.stream()
             .map(SearchResult::new)

@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import dk.stonemountain.business.domain.Hit.Pair;
 import dk.stonemountain.business.dto.Site;
 import dk.stonemountain.business.util.JsonbHelper;
-import io.vertx.core.cli.Option;
 
 @ApplicationScoped
 public class ElasticSearchService {
@@ -38,29 +37,17 @@ public class ElasticSearchService {
         T read(String id, JsonObject o);
     }
 
-    public static final SourceReader<Page> pageSourceReader = (id, o) -> JsonbHelper.fromJson(o.toString(), Page.class);;
+    public static final SourceReader<Page> pageSourceReader = (id, o) -> JsonbHelper.fromJson(o.toString(), Page.class);
     public static final SourceReader<Site> siteSourceReader = (id, o) -> JsonbHelper.fromJson(o.toString(), Site.class);
-
-    public enum Index {
-        SITES("sites"), PAGES("pages");
-
-        private final String indexName;
-
-        private Index(String index) {
-            this.indexName = index;
-        }
-
-        public String getIndex() { return indexName; }
-    }
 
     @Inject
     RestClient restClient;
     
-    public <T> Optional<T> getById(Class<T> clazz, SourceReader<T> reader, Index index, String id) {
+    public <T> Optional<T> getById(SourceReader<T> reader, String index, String id) {
         try {
             Request request = new Request(
                     "GET",
-                    "/" + index.getIndex() + "/_doc/" + id);
+                    "/" + index + "/_doc/" + id);
             Response response = restClient.performRequest(request);
             String responseBody = EntityUtils.toString(response.getEntity());
             log.debug("Retrieved entity {} from index {} with id {}", responseBody, index, id);
@@ -75,13 +62,13 @@ public class ElasticSearchService {
         }
     }
 
-    public void addToIndex(Index index, String id, Object source) {
+    public void addToIndex(String index, String id, Object source) {
         Request request = new Request(
                 "PUT",
-                "/" + index.getIndex() + "/_doc/" + id); 
+                "/" + index + "/_doc/" + id); 
         String body = JsonbHelper.toJson(source);
         request.setJsonEntity(body);
-        log.debug("Adding with id {} to index {}: {}", id, index.getIndex(), source);
+        log.debug("Adding with id {} to index {}: {}", id, index, source);
         try {
             restClient.performRequest(request); 
         } catch (IOException e) {
@@ -109,7 +96,7 @@ public class ElasticSearchService {
         }
     }
 
-    public <T> List<Hit<T>> searchByFullTextSearch(Index index, SourceReader<T> reader, String query, String... fields) {
+    public <T> List<Hit<T>> searchByFullTextSearch(String index, SourceReader<T> reader, String query, String... fields) {
         JsonObjectBuilder simpleQueryBuilder = Json.createObjectBuilder();
         JsonObjectBuilder queryBuilder = Json.createObjectBuilder();
         JsonArrayBuilder fieldsBuilder = Json.createArrayBuilder();
@@ -141,7 +128,7 @@ public class ElasticSearchService {
     }
 
 
-    public <T> List<Hit<T>> searchByTerms(Index index, SourceReader<T> reader, TermMatchPair... termPairs) {
+    public <T> List<Hit<T>> searchByTerms(String index, SourceReader<T> reader, TermMatchPair... termPairs) {
         JsonObjectBuilder boolBuilder = Json.createObjectBuilder();
         JsonObjectBuilder mustBuilder = Json.createObjectBuilder();
         JsonArrayBuilder termsBuilder = Json.createArrayBuilder();
@@ -160,7 +147,7 @@ public class ElasticSearchService {
         return search(index, reader, boolBuilder.build(), Optional.empty());
     }
 
-    public <T> List<Hit<T>> search(Index index, SourceReader<T> reader, String term, String match) {
+    public <T> List<Hit<T>> search(String index, SourceReader<T> reader, String term, String match) {
         JsonObjectBuilder matchBuilder = Json.createObjectBuilder();
         JsonObjectBuilder termBuilder = Json.createObjectBuilder();
         termBuilder.add(term, match);
@@ -168,18 +155,18 @@ public class ElasticSearchService {
         return search(index, reader, matchBuilder.build(), Optional.empty());
     }
 
-    public <T> List<Hit<T>> searchAll(Index index, SourceReader<T> reader) {
+    public <T> List<Hit<T>> searchAll(String index, SourceReader<T> reader) {
         JsonObjectBuilder matchBuilder = Json.createObjectBuilder();
         matchBuilder.add("match_all", JsonValue.EMPTY_JSON_OBJECT);
         return search(index, reader, matchBuilder.build(), Optional.empty());
     }
 
 
-    public <T> List<Hit<T>> search(Index index, SourceReader<T> reader, JsonObject query, Optional<JsonObject> highlight, String... fields) {
+    public <T> List<Hit<T>> search(String index, SourceReader<T> reader, JsonObject query, Optional<JsonObject> highlight, String... fields) {
         try {
             Request request = new Request(
                     "GET",
-                    "/" + index.getIndex() + "/_search");
+                    "/" + index + "/_search");
 
             JsonObjectBuilder queryBuilder = Json.createObjectBuilder();
             queryBuilder.add("size", 25);
@@ -226,7 +213,7 @@ public class ElasticSearchService {
             return null;
         }
         
-        List<String> stringHighlights = highlights.stream().map(v -> asString(v)).toList();
+        List<String> stringHighlights = highlights.stream().map(this::asString).toList();
         return new Hit.Pair<>(field, stringHighlights);
     }
 

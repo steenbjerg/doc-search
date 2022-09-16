@@ -1,6 +1,5 @@
 package dk.stonemountain.business.domain;
 
-import javax.json.JsonObject;
 import javax.json.bind.annotation.JsonbProperty;
 
 public class Page {
