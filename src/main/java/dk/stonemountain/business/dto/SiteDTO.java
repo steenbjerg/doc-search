@@ -2,11 +2,13 @@ package dk.stonemountain.business.dto;
 
 import java.time.ZonedDateTime;
 
-import javax.json.bind.annotation.JsonbProperty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import dk.stonemountain.business.domain.Site;
+import jakarta.json.bind.annotation.JsonbProperty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
-public class Site {
+public class SiteDTO {
+    public Long id;
     @NotNull
     @Size(min=7)
     @JsonbProperty("start-url")
@@ -33,14 +35,26 @@ public class Site {
     @Size(min=7)
     public String icon;
 
-    public Site() {
+    public SiteDTO() {
     }
 
-    public Site(String name, String startUrl, String inclusionUrl, String icon) {
+    public SiteDTO(String name, String startUrl, String inclusionUrl, String icon) {
         this.name = name;
         this.startUrl = startUrl;
         this.inclusionUrl = inclusionUrl;
         this.icon = icon;
+    }
+
+    public SiteDTO(Site s) {
+        this.id = s.id;
+        this.displayName = s.displayName;
+        this.icon = s.icon;
+        this.inclusionUrl = s.inclusionUrl;
+        this.lastSuccessfulCrawl = s.lastSuccessfulCrawl;
+        this.lastSuccessfulCrawlDuration = s.lastSuccessfulCrawlDuration == null ? null : s.lastSuccessfulCrawlDuration.toString();
+        this.mainUrl = s.mainUrl;
+        this.name = s.name;
+        this.startUrl = s.startUrl;
     }
 
     @Override
@@ -49,5 +63,17 @@ public class Site {
                 + ", lastSuccessfulCrawl=" + lastSuccessfulCrawl + ", lastSuccessfulCrawlDuration="
                 + lastSuccessfulCrawlDuration + ", mainUrl=" + mainUrl + ", name=" + name + ", startUrl=" + startUrl
                 + "]";
+    }
+
+    public Site toDomain(Site site) {
+        site.displayName = displayName;
+        site.icon = icon;
+        site.inclusionUrl = inclusionUrl;
+        site.lastSuccessfulCrawl = lastSuccessfulCrawl;
+        site.lastSuccessfulCrawlDuration = lastSuccessfulCrawlDuration;
+        site.mainUrl = mainUrl;
+        site.name = name;
+        site.startUrl = startUrl;
+        return site;
     }
 }

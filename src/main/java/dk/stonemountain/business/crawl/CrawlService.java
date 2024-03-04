@@ -5,8 +5,6 @@ import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.enterprise.context.ApplicationScoped;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,8 +12,9 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.stonemountain.business.dto.Site;
+import dk.stonemountain.business.domain.Site;
 import io.quarkus.arc.Lock;
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 @Lock

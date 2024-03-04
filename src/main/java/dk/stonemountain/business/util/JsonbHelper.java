@@ -3,9 +3,9 @@ package dk.stonemountain.business.util;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+import jakarta.json.bind.JsonbConfig;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Search</title>
+    <style type="text/css">
+
+        ul {
+            list-style-type: none
+        }
+
+        li {
+            display: grid;
+            grid-template-columns: 20px auto;
+            justify-content: start;
+            align-items: center;
+        }
+
+        li::before {
+            content: "\00BB";
+        }
+    </style>
+</head>
+
+<body>
+    <h1>The Search Formular</h1>
+    <div>You search by selecting a site in which you wish to search, and entering a search query to search for.</div>
+    <h2>Site Selection</h2>
+    <div>There has been added a number of sites to the Dev-Search facility. These sites have been crawled and prepared
+        for searching. You can only search inside a single site at the time.</div>
+    <h2>Search Language</h2>
+    <div>The query language in version {version} of the Dev-Search application is based upon <a
+            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-simple-query-string-query.html#simple-query-string-syntax">the
+            simple queries of Elastic Search</a></div>
+    <div>A query can look like this: <em>"Fault Tolerance" + microprofile</em>. This query searches for pages having the
+        term <em>Fault Tolerance</em> and the word <em>microprofile</em>.</div>
+    <div>A search query can contain these boolean operators (only the most useful operators are mentioned):
+        <ul>
+            <li>+ signifies AND operation</li>
+            <li>| signifies OR operation</li>
+            <li>- negates a single token</li>
+            <li>" wraps a number of tokens to signify a phrase for searching</li>
+            <li>* at the end of a term signifies a prefix query</li>
+            <li>( and ) signify precedence</li>
+        </ul>
+
+    </div>
+</body>
+
+</html>

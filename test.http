@@ -1,0 +1,56 @@
+
+# @name createsite
+POST http://localhost:8080/sites
+content-type: application/json
+
+{
+    "start-url": "https://quarkus.io/guides",
+    "main-url":  "https://quarkus.io",
+    "inclusion-url": "https://quarkus.io/guides",
+    "name": "QuarkusGuides",
+    "display-name": "Quarkus Guides"
+}
+
+###
+
+# @name getsite
+
+GET http://localhost:8080/sites
+Accept: application/json
+
+###
+
+# @name crawl
+
+PUT http://localhost:8080/sites/QuarkusGuides/crawl
+Accept: application/json
+
+###
+
+# @name search
+
+GET http://localhost:8080/sites/Quarkus%20Guides/pages/search-by-text?pattern=datasource
+Accept: application/json
+
+###
+
+# @name getversions
+
+GET http://localhost:8080/clients/versions
+Accept: application/json
+
+###
+
+# @name registerclient
+
+POST http://localhost:8080/clients/registered
+content-type: application/json
+
+{
+    "hostname": "somehost",
+    "ip-address": "127.0.0.1",
+    "user": "myself",
+    "version": "0.0.1",
+    "os": "mylinux"
+
+}
