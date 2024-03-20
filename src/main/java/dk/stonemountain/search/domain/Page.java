@@ -1,7 +1,8 @@
-package dk.stonemountain.business.domain;
+package dk.stonemountain.search.domain;
 
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.Entity;
@@ -26,6 +27,7 @@ public class Page extends PanacheEntity {
     public String pageText;
     @ManyToOne
     @NotNull
+    @IndexedEmbedded
     public Site owner;
 
     public Page() {

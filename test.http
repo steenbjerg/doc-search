@@ -13,6 +13,48 @@ content-type: application/json
 
 ###
 
+# @name createsitenewsletter
+POST http://localhost:8080/sites
+content-type: application/json
+
+{
+    "start-url": "https://quarkus.io/newsletter",
+    "main-url":  "https://quarkus.io",
+    "inclusion-url": "https://quarkus.io/newsletter/",
+    "name": "QuarkusNewsletter",
+    "display-name": "Quarkus Newsletters"
+}
+
+###
+
+# @name createesitequte
+POST http://localhost:8080/sites
+content-type: application/json
+
+{
+    "start-url": "https://quarkus.io/guides/qute",
+    "main-url":  "https://quarkus.io",
+    "inclusion-url": "https://quarkus.io/guides/qute",
+    "name": "QuarkusGuidesQute",
+    "display-name": "Quarkus Guides Qute"
+}
+
+###
+
+# @name createesitelogging
+POST http://localhost:8080/sites
+content-type: application/json
+
+{
+    "start-url": "https://quarkus.io/guides/logging",
+    "main-url":  "https://quarkus.io",
+    "inclusion-url": "https://quarkus.io/guides/logging",
+    "name": "QuarkusGuidesLogging",
+    "display-name": "Quarkus Guides Logging"
+}
+
+###
+
 # @name getsite
 
 GET http://localhost:8080/sites
@@ -22,22 +64,29 @@ Accept: application/json
 
 # @name crawl
 
-PUT http://localhost:8080/sites/QuarkusGuides/crawl
+PUT http://localhost:8080/sites/QuarkusNewsletter/crawl
 Accept: application/json
 
 ###
 
 # @name search
 
-GET http://localhost:8080/sites/Quarkus%20Guides/pages/search-by-text?pattern=datasource
+GET http://localhost:8080/sites/QuarkusGuides/pages/search-by-text?pattern=cdi
 Accept: application/json
 
 ###
 
 # @name getversions
 
-GET http://localhost:8080/clients/versions
+GET http://localhost:8080/clients/versions/linux
 Accept: application/json
+
+###
+
+# @name getversionssw
+
+GET http://localhost:8080/clients/versions/linux/0.0.1
+Accept: application/octet-stream
 
 ###
 
@@ -52,5 +101,4 @@ content-type: application/json
     "user": "myself",
     "version": "0.0.1",
     "os": "mylinux"
-
 }

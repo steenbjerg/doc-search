@@ -1,4 +1,4 @@
-package dk.stonemountain.business;
+package dk.stonemountain.search;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -12,12 +12,12 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Projection
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.stonemountain.business.crawl.CrawlService;
-import dk.stonemountain.business.domain.Page;
-import dk.stonemountain.business.domain.Site;
-import dk.stonemountain.business.dto.SearchResultDTO;
-import dk.stonemountain.business.dto.SiteDTO;
-import dk.stonemountain.business.dto.SitesDTO;
+import dk.stonemountain.search.crawl.CrawlService;
+import dk.stonemountain.search.domain.Page;
+import dk.stonemountain.search.domain.Site;
+import dk.stonemountain.search.dto.SearchResultDTO;
+import dk.stonemountain.search.dto.SiteDTO;
+import dk.stonemountain.search.dto.SitesDTO;
 import io.quarkus.runtime.StartupEvent;
 import io.smallrye.common.constraint.NotNull;
 import jakarta.enterprise.event.Observes;
@@ -110,16 +110,21 @@ public class SiteResource {
     @Path("/{siteName}/pages/search-by-text")
     @Produces(MediaType.APPLICATION_JSON)
     public List<SearchResultDTO> searchByText(@PathParam("siteName") @NotBlank String siteName, @QueryParam("pattern") String pattern, @QueryParam("elements") @DefaultValue("10") Integer elements) {
+        log.info("Search for {} in site {}", pattern, siteName);
+        var site = Site.<Site>find("name", siteName).singleResult(); // NOSONAR
         var result = searchSession.search(Page.class)
             .select(PageHit.class)
-            .where(f ->
-                pattern == null || pattern.trim().isEmpty() ? f.matchAll() : f.simpleQueryString().fields("pageText", "title").matching(pattern)
-            )
+            .where(f -> f.and(
+                f.simpleQueryString().fields("pageText", "title").matching(pattern),
+                f.match().field("owner.name").matching(site.name).boost(2.0f)
+            ))
             .highlighter(f -> f.plain().noMatchSize( 100 ))
             .fetchHits(elements); 
 
-        return result.stream()
+        var hits = result.stream()
             .map(SearchResultDTO::new)
             .toList();
+        log.info("Found {} hits", hits.size());
+        return hits;
     }
 }

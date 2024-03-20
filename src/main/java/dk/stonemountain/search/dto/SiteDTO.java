@@ -1,8 +1,8 @@
-package dk.stonemountain.business.dto;
+package dk.stonemountain.search.dto;
 
 import java.time.ZonedDateTime;
 
-import dk.stonemountain.business.domain.Site;
+import dk.stonemountain.search.domain.Site;
 import jakarta.json.bind.annotation.JsonbProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

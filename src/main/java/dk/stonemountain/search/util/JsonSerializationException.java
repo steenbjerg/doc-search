@@ -1,4 +1,4 @@
-package dk.stonemountain.business.util;
+package dk.stonemountain.search.util;
 
 public class JsonSerializationException extends RuntimeException {
 	public JsonSerializationException(Exception e) {

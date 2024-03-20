@@ -1,4 +1,4 @@
-package dk.stonemountain.business.domain;
+package dk.stonemountain.search.domain;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -6,16 +6,22 @@ import java.util.List;
 
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-@Entity
+@Entity()
+@Table(uniqueConstraints = {
+    @jakarta.persistence.UniqueConstraint(columnNames = "name"),
+    @jakarta.persistence.UniqueConstraint(columnNames = "displayName")
+})
 @Indexed
 public class Site extends PanacheEntity {
     @NotNull

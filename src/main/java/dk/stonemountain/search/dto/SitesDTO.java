@@ -1,4 +1,4 @@
-package dk.stonemountain.business.dto;
+package dk.stonemountain.search.dto;
 
 import java.time.ZonedDateTime;
 import java.util.List;

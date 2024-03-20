@@ -1,4 +1,4 @@
-package dk.stonemountain.business.crawl;
+package dk.stonemountain.search.crawl;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -12,7 +12,7 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import dk.stonemountain.business.domain.Site;
+import dk.stonemountain.search.domain.Site;
 import io.quarkus.arc.Lock;
 import jakarta.enterprise.context.ApplicationScoped;
 

@@ -1,4 +1,4 @@
-package dk.stonemountain.business;
+package dk.stonemountain.search;
 
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
